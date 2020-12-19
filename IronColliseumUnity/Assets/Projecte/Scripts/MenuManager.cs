@@ -11,27 +11,36 @@ public class MenuManager : MonoBehaviour
     public GameObject Slider;
     public Animator animator;
     [SerializeField] private bool optionsLoaded;
+    private GameManager manager;
+    private HUD hud;
 
     public GameObject options;
-
+    public bool openOptions;
 
     private void Start()
     {
         Time.timeScale = 1;
+        manager = GameObject.FindGameObjectWithTag("Manager").GetComponent<GameManager>();
+        hud = GameObject.FindGameObjectWithTag("HUD").GetComponent<HUD>();
+
     }
 
     private void Update()
     {
- 
+        if (openOptions)
+        {
+            manager.pause = true;
+            hud.OpenPausePanel(false);
+        }
     }
     public void LoadGame()
     {
-        StartCoroutine (WaitLoadGame());
+        StartCoroutine(WaitLoadGame());
     }
 
     public void Menu()
     {
-        
+
         StartCoroutine(WaitLoadMenu());
 
     }
@@ -39,12 +48,13 @@ public class MenuManager : MonoBehaviour
     public void Options()
     {
 
-        StartCoroutine (WaitLoadOptions());
+        StartCoroutine(WaitLoadOptions());
 
     }
 
     public void CloseOptions()
     {
+
         StartCoroutine(WaitCloseOptions());
     }
 
@@ -60,7 +70,7 @@ public class MenuManager : MonoBehaviour
         animator.SetTrigger("Start");
         yield return new WaitForSecondsRealtime(1);
         SceneManager.LoadScene("Escenari1");
-        
+
     }
 
     IEnumerator WaitLoadMenu()
@@ -76,6 +86,9 @@ public class MenuManager : MonoBehaviour
         yield return new WaitForSecondsRealtime(1);
         options.SetActive(true);
         animator.SetTrigger("End");
+        openOptions = true;
+        manager.pause = true;
+        hud.OpenPausePanel(false);
         //yield return new WaitForSecondsRealtime(1);
 
 
@@ -87,6 +100,9 @@ public class MenuManager : MonoBehaviour
         yield return new WaitForSecondsRealtime(1);
         options.SetActive(false);
         animator.SetTrigger("End");
+        openOptions = false;
+        manager.pause = true;
+        hud.OpenPausePanel(true);
 
     }
 

@@ -5,6 +5,8 @@ using UnityEngine.UI;
 using UnityEngine.Audio;
 using UnityEngine.Events;
 using TMPro;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.HighDefinition;
 
 
 public class SettingsMenu : MonoBehaviour
@@ -12,6 +14,7 @@ public class SettingsMenu : MonoBehaviour
 
     static string music_PPrefsTag = "Music";
     static string vfx_PPrefsTag = "vfx";
+    static string brightness_PPrefsTag = "Brightness";
 
     public AudioMixer mixer;
     public Slider slider;
@@ -29,6 +32,12 @@ public class SettingsMenu : MonoBehaviour
     public Toggle fullscreen;
 
     private bool isFullscreen = false;
+
+    [SerializeField] Slider sliBrightness;
+
+    ColorAdjustments colorAdjustments;
+
+    [SerializeField] Volume volume;
 
     private int screenInt;
     private void Awake()
@@ -62,9 +71,11 @@ public class SettingsMenu : MonoBehaviour
     }
     public void Start()
     {
+        volume.profile.TryGet<ColorAdjustments>(out colorAdjustments);
 
         sliderVFX.value = PlayerPrefs.GetFloat(vfx_PPrefsTag, 0.5f);
         slider.value = PlayerPrefs.GetFloat(music_PPrefsTag, 0.5f);
+        sliBrightness.value = PlayerPrefs.GetFloat(brightness_PPrefsTag, 0.75f);
 
         //slider.value = PlayerPrefs.GetFloat("MVolume", 1f);
         //mixer.SetFloat("MusicVolume", PlayerPrefs.GetFloat("MVolume"));
@@ -119,7 +130,7 @@ public class SettingsMenu : MonoBehaviour
         QualitySettings.SetQualityLevel(qualityIndex);
     }
 
-    public void SetResolution (int resolutionIndex)
+    public void SetResolution(int resolutionIndex)
     {
         Resolution resolution = resolutions[resolutionIndex];
 
@@ -142,6 +153,20 @@ public class SettingsMenu : MonoBehaviour
             PlayerPrefs.SetInt("toglestate", 1);
 
         }
+    }
+
+    public void OnSliGammaValue(float newValue)
+    {
+        PlayerPrefs.SetFloat(brightness_PPrefsTag, newValue);
+        colorAdjustments.postExposure.value = NormalizedToRange(newValue, -5f, 5f);
+    }
+
+    public float NormalizedToRange(float value, float min, float max)
+    {
+        float range = max - min;
+        float rangedValue = min + (value * range);
+
+        return rangedValue;
     }
 
     public static float LinearToDecibel(float linear)

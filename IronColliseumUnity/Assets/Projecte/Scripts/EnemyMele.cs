@@ -20,17 +20,22 @@ public class EnemyMele : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (enemy.canAttack == false)
-        {
-            Attack();
-        }
+        //if (enemy.canAttack == false)
+        //{
+        //    Attack();
+        //}
     }
 
 
     public void Attack()
     {
         animator.SetBool ("Attack", true);
-        StartCoroutine(WaitAttack());
+        //StartCoroutine(WaitAttack());
+    }
+
+    public void ReturnIdle()
+    {
+        animator.SetBool("Attack", false);
     }
 
     IEnumerator WaitAttack()
