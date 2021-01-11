@@ -20,6 +20,7 @@ public class MenuManager : MonoBehaviour
     private void Start()
     {
         Time.timeScale = 1;
+
         manager = GameObject.FindGameObjectWithTag("Manager").GetComponent<GameManager>();
         hud = GameObject.FindGameObjectWithTag("HUD").GetComponent<HUD>();
 

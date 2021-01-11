@@ -13,6 +13,8 @@ public class EnemyBehaviour : MonoBehaviour
     public float life;
     public float maxLife;
 
+    public bool dead;
+
     //public Renderer renderer;
     //public Renderer renderer2;
     //private Material mymat;
@@ -98,6 +100,7 @@ public class EnemyBehaviour : MonoBehaviour
     {
         if (life <= 0)
         {
+            dead = true;
             //col.enabled = false;
 
             //foreach (Transform child in transform)

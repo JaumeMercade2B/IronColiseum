@@ -20,7 +20,7 @@ public class FPSController : MonoBehaviour
     [SerializeField] float waitShield = 5;
     [SerializeField] float cooldownShield = 0;
     [SerializeField] float speedCharge = 0.1f;
-
+    [SerializeField] bool shader;
 
 
 
@@ -107,6 +107,12 @@ public class FPSController : MonoBehaviour
     public AudioSource tuercasSound;
 
 
+    private bool changeDirection;
+    private Vector3 currentDirection;
+    private Vector3 newDirection;
+
+
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -114,7 +120,7 @@ public class FPSController : MonoBehaviour
         hasJumped = false;
         isDead = false;
         numTuto = 0;
-
+        shader = false;
         life = maxLife;
         shield = maxShield;
         totalLife = life + shield;
@@ -189,17 +195,43 @@ public class FPSController : MonoBehaviour
 
         if (direction.x == 0 && direction.z == 0)
         {
-            movementSpeed = 1;
+            movementSpeed = 0;
+            
         }
 
         else if (direction.x != 0 || direction.z != 0)
         {
-            movementSpeed += 1;
+            currentDirection = direction;
 
-            if (movementSpeed >= normalSpeed)
+            if (currentDirection != direction)
             {
-                movementSpeed = normalSpeed;
+                movementSpeed = 0;
+                currentDirection = direction;
             }
+
+            if (isGrounded == true)
+            {
+                normalSpeed = 8;               
+                movementSpeed += 0.5f;
+
+                if (movementSpeed >= normalSpeed)
+                {
+                    movementSpeed = normalSpeed;
+                    
+                }
+            }
+
+            else if (isGrounded == false)
+            {
+                normalSpeed = 3;
+                movementSpeed += 0.5f;
+
+                if (movementSpeed >= normalSpeed)
+                {
+                    movementSpeed = normalSpeed;
+                }
+            }
+
         }
 
         
@@ -215,6 +247,7 @@ public class FPSController : MonoBehaviour
         if (shield <= 0)
         {
             shield = 0;
+            shader = true;
         }
 
         if (shield < maxShield)
@@ -351,6 +384,7 @@ public class FPSController : MonoBehaviour
             Death();
         }
 
+    
 
     }
 

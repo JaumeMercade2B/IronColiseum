@@ -49,6 +49,15 @@ public class Arma : MonoBehaviour
 
     private FPSController player;
 
+    public Material dissolveMat;
+    public float disolve;
+
+    public bool appear;
+
+    public bool hudAppear;
+    public bool disappear;
+
+
     void Awake()
     {
         /*
@@ -73,6 +82,10 @@ public class Arma : MonoBehaviour
 
         SetActive();
         hud.SetAmmoText(ammo);
+
+        disolve = 1;
+        dissolveMat.SetFloat("Vector1_283E90B", disolve);
+
     }
 
     private void Start()
@@ -143,6 +156,34 @@ public class Arma : MonoBehaviour
             }
         }
 
+        if (appear == true)
+        {
+            shoot = false;
+            disolve -= 0.8f * Time.deltaTime;
+            dissolveMat.SetFloat("Vector1_283E90B", disolve);
+            if (disolve <= 0)
+            {
+                disolve = 0;
+                dissolveMat.SetFloat("Vector1_283E90B", disolve);
+                hudAppear = true;
+                shoot = true;
+                appear = false;
+            }
+        }
+
+        if (disappear == true)
+        {
+            shoot = false;
+            disolve += 0.8f * Time.deltaTime;
+            dissolveMat.SetFloat("Vector1_283E90B", disolve);
+
+            if (disolve >= 1)
+            {
+                spawn.SetActive(false);
+            }
+            
+        }
+
         //PointingEnemy();
     }
 
@@ -188,12 +229,16 @@ public class Arma : MonoBehaviour
     {
         if (change.ReturnCurrent() == 0)
         {
+            disappear = false;
             spawn.SetActive(true);
+            appear = true;
         }
 
         else if (change.ReturnCurrent() != 0)
         {
-            spawn.SetActive(false);
+            hudAppear = false;
+            disappear = true;
+            
         }
     }
 

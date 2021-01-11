@@ -25,6 +25,8 @@ TagManager:
   - Wall
   - Ceiling
   - Barranc
+  - Police
+  - Dron
   layers:
   - Default
   - TransparentFX

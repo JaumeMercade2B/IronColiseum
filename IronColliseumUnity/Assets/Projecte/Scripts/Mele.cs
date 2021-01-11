@@ -14,6 +14,8 @@ public class Mele : MonoBehaviour
     public AudioSource hit;
 
     public EnemyBehaviour enemy;
+    public FuckThePoliceBehaviour fuckPolice;
+    public DronBehaviour dron;
 
     // Start is called before the first frame update
     void Start()
@@ -40,6 +42,7 @@ public class Mele : MonoBehaviour
         else
         {
             animator.SetTrigger("Idle");
+            col.enabled = false;
         }
     }
 
@@ -47,6 +50,7 @@ public class Mele : MonoBehaviour
     {
         if (cadency >= 2f)
         {
+            col.enabled = true;
             isAttacking = true;
             hit.Play();
             StartCoroutine(WaitForAttack());
@@ -71,6 +75,28 @@ public class Mele : MonoBehaviour
             
             //}
   
+        }
+
+        if (other.tag == "Police")
+        {
+            //if (isAttacking)
+            //{
+            fuckPolice = GameObject.FindGameObjectWithTag("Police").GetComponent<FuckThePoliceBehaviour>();
+            fuckPolice.GetDamage(damage);
+
+            //}
+
+        }
+
+        if (other.tag == "Dron")
+        {
+            //if (isAttacking)
+            //{
+            dron = GameObject.FindGameObjectWithTag("Dron").GetComponent<DronBehaviour>();
+            dron.GetDamage(damage);
+
+            //}
+
         }
     }
 
