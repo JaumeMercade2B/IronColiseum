@@ -30,10 +30,6 @@ public class HUD : MonoBehaviour
 
     public Image misilUI;
 
-    public Lanzallamas lanza;
-    public Arma plasma;
-    public Metralleta metralleta;
-
 
     public void Awake()
     {
@@ -45,12 +41,12 @@ public class HUD : MonoBehaviour
 
     public void Update()
     {
-        if (change.ReturnCurrent() == 0 && plasma.hudAppear == true)
+        if (change.ReturnCurrent() == 0)
         {
             hudArma.SetActive(true);
         }
 
-        else if (change.ReturnCurrent() != 0 || plasma.hudAppear == false)
+        else if (change.ReturnCurrent() != 0)
         {
             hudArma.SetActive(false);
         }
@@ -65,12 +61,12 @@ public class HUD : MonoBehaviour
             hudMetralleta.SetActive(false);
         }
 
-        if (change.ReturnCurrent() == 2 && lanza.hudAppear == true)
+        if (change.ReturnCurrent() == 2)
         {
             hudLanza.SetActive(true);
         }
 
-        else if (change.ReturnCurrent() != 2 || lanza.hudAppear == false)
+        else if (change.ReturnCurrent() != 2)
         {
             hudLanza.SetActive(false);
         }

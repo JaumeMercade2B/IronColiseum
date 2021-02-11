@@ -8,7 +8,7 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: "Ca\xF1on_plasma_LP_Ca\xF1on_plasma_LPMat"
-    second: {fileID: 2100000, guid: c685350c8e51ed9488a33a8add24b0d0, type: 2}
+    second: {fileID: 2100000, guid: 0c0af1963dec5d54aa02d150a1e91f9c, type: 2}
   materials:
     materialImportMode: 1
     materialName: 0

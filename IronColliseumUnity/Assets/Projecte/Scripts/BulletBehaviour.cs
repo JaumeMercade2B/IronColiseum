@@ -13,23 +13,13 @@ public class BulletBehaviour : MonoBehaviour
     
 
     private EnemyBehaviour  enemy;
-    private FuckThePoliceBehaviour fuckPolice;
-    private DronBehaviour dron;
     private FPSController player;
-
-    public GameObject bullet;
-    public GameObject muzzle;
-
-    public Collider col;
 
 
     // Start is called before the first frame update
     void Start()
     {
-        bullet.SetActive(true);
-        muzzle.SetActive(false);
 
-        enemy = GameObject.FindGameObjectWithTag("Enemy").GetComponent<EnemyBehaviour>();
     }
 
     // Update is called once per frame
@@ -62,42 +52,12 @@ public class BulletBehaviour : MonoBehaviour
 
         if (other.tag == "Enemy")
         {
-            col.enabled = false;
-            gameObject.transform.parent = enemy.transform;
-            speed = 0;
-            bullet.SetActive(false);
-            muzzle.SetActive(true);
             enemy = other.gameObject.GetComponent<EnemyBehaviour>();
             enemy.GetDamage(damage);
-            Destroy(gameObject, 0.2f);
-            Destroy(muzzle, 0.2f);
-
-        }
-
-        if (other.tag == "Police")
-        {
-            speed = 0;
-
-            bullet.SetActive(false);
-            muzzle.SetActive(true);
-            fuckPolice = other.gameObject.GetComponent<FuckThePoliceBehaviour>();
-            fuckPolice.GetDamage(damage/2);
-            Destroy(gameObject, 0.2f);
-        }
-
-        if (other.tag == "Dron")
-        {
-            speed = 0;
-            bullet.SetActive(false);
-            muzzle.SetActive(true);
-            dron = other.gameObject.GetComponent<DronBehaviour>();
-            dron.GetDamage(damage / 2);
-            Destroy(gameObject, 0.2f);
+            Destroy(gameObject);
         }
 
     }
-
-
 
 
 

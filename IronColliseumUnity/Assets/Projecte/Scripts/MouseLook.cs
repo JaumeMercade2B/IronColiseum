@@ -7,7 +7,7 @@ public class MouseLook : MonoBehaviour
 {
 
     private PlayerControls controls;
-    [SerializeField] public float mouseSensitivity = 100f;
+    [SerializeField] private float mouseSensitivity = 100f;
 
     public Vector2 look;
     public float direction;

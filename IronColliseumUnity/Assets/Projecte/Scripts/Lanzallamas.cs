@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.VFX;
 using UnityEngine.Lumin;
-using Cinemachine;
-
 
 
 public class Lanzallamas : MonoBehaviour
@@ -18,9 +16,6 @@ public class Lanzallamas : MonoBehaviour
     private GameManager manager;
     private HUD hud;
     private EnemyBehaviour enemy;
-    private FuckThePoliceBehaviour fuckPolice;
-    private DronBehaviour dron;
-
     private FPSController player;
 
 
@@ -35,20 +30,9 @@ public class Lanzallamas : MonoBehaviour
     public AudioSource hold;
     public AudioSource stop;
 
-    private Camera mainCamera;
-    public MouseLook mouseSens;
-    public CinemachineVirtualCamera cam;
-
     //public Light fireLight;
 
     //private bool isShooting = false;
-
-    public Material dissolveMat;
-    public float disolve;
-
-    public bool appear;
-    public bool disappear;
-    public bool hudAppear;
 
     void Start()
     {
@@ -59,18 +43,12 @@ public class Lanzallamas : MonoBehaviour
         manager = GameObject.FindGameObjectWithTag("Manager").GetComponent<GameManager>();
         hud = GameObject.FindGameObjectWithTag("HUD").GetComponent<HUD>();
         player = GameObject.FindGameObjectWithTag("Player").GetComponent<FPSController>();
-        mainCamera = Camera.main;
 
         ammo = maxAmmo;
         hud.SetLanzallamasText(ammo, maxAmmo);
-
-        
-        disolve = 1;
-        dissolveMat.SetFloat("Vector1_283E90B", disolve);
-
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
         if (canShoot)
         {
@@ -90,20 +68,6 @@ public class Lanzallamas : MonoBehaviour
                     enemy.GetDamage(damage);
                     Debug.Log("hit");
                 }
-
-                if (hit.transform.CompareTag("Police"))
-                {
-                    fuckPolice = hit.transform.GetComponent<FuckThePoliceBehaviour>();
-                    fuckPolice.GetDamage(damage);
-                    Debug.Log("hit");
-                }
-
-                if (hit.transform.CompareTag("Dron"))
-                {
-                    dron = hit.transform.GetComponent<DronBehaviour>();
-                    dron.GetDamage(damage);
-                    Debug.Log("hit");
-                }
             }
 
             if (player.godMode == false)
@@ -119,35 +83,6 @@ public class Lanzallamas : MonoBehaviour
         {
             ammo = 0;
             Reload();
-            
-        }
-
-        if (appear == true)
-        {
-            reloading = true;
-            disolve -= 0.8f * Time.deltaTime;
-            dissolveMat.SetFloat("Vector1_283E90B", disolve);
-            if (disolve <= 0)
-            {
-                disolve = 0;
-                dissolveMat.SetFloat("Vector1_283E90B", disolve);
-                hudAppear = true;
-                reloading = false;
-                appear = false;
-            }
-        }
-
-        if (disappear == true)
-        {
-            reloading = true;
-            disolve += 0.8f * Time.deltaTime;
-            dissolveMat.SetFloat("Vector1_283E90B", disolve);
-
-            if (disolve >= 1)
-            {
-                gameObject.SetActive(false);
-            }
-
         }
     }
 
@@ -171,11 +106,10 @@ public class Lanzallamas : MonoBehaviour
         if (ammo > 0 && player.isDead == false)
         {
             hold.Play();
-            mouseSens.mouseSensitivity = 8;
             canShoot = true;
             
         }
-
+ 
     }
 
     public void stopShot()
@@ -183,9 +117,6 @@ public class Lanzallamas : MonoBehaviour
         flamethrower.Stop();
         hold.Stop();
         stop.Stop();
-        mouseSens.mouseSensitivity = 12;
-        
-
 
         if (manager.pause == false && justReloaded == false && reloading == false)
         {
@@ -205,25 +136,18 @@ public class Lanzallamas : MonoBehaviour
     {
         if (change.ReturnCurrent() == 2)
         {
-            disappear = false;
-            appear = true;
             gameObject.SetActive(true);
         }
 
         else if (change.ReturnCurrent() != 2)
         {
-            disappear = true;
-            hudAppear = false;
-            
+            gameObject.SetActive(false);
         }
     }
 
     public void Reload()
     {
         flamethrower.Stop();
-        mouseSens.mouseSensitivity = 12;
-        
-        StopCoroutine(PointFOVIn());
 
         if (reloading || ammo == maxAmmo || manager.pause == true)
         {
@@ -249,23 +173,6 @@ public class Lanzallamas : MonoBehaviour
 
     }
 
-    private IEnumerator PointFOVIn()
-    {
-        while (cam.m_Lens.FieldOfView < 18.1f)
-        {
-            cam.m_Lens.FieldOfView++;
-            yield return new WaitForEndOfFrame();
-        }
-    }
-
-    private IEnumerator PointFOVOut()
-    {
-        while (cam.m_Lens.FieldOfView > 18)
-        {
-            cam.m_Lens.FieldOfView--;
-            yield return new WaitForEndOfFrame();
-        }
-    }
 
 
 }

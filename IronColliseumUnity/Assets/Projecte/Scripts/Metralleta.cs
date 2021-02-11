@@ -35,10 +35,6 @@ public class Metralleta : MonoBehaviour
 
     private EnemyBehaviour enemy;
 
-    private FuckThePoliceBehaviour fuckPolice;
-
-    private DronBehaviour dron;
-
     private HUD hud;
 
     private FPSController player;
@@ -104,32 +100,8 @@ public class Metralleta : MonoBehaviour
                         Debug.Log("hit");
                     }
 
-                if (hit.transform.CompareTag("Police"))
-                {
-                    fuckPolice = hit.transform.GetComponent<FuckThePoliceBehaviour>();
-                    fuckPolice.GetDamage(damage);
-                    //enemyHit.Play(hit.transform)
-                    //enemyHit.transform.position = 
-                    //enemyHit.Play();
-                    Destroy(enemyHit, 1f);
 
-                    Debug.Log("hit");
                 }
-
-                if (hit.transform.CompareTag("Dron"))
-                {
-                    dron = hit.transform.GetComponent<DronBehaviour>();
-                    dron.GetDamage(damage);
-                    //enemyHit.Play(hit.transform)
-                    //enemyHit.transform.position = 
-                    //enemyHit.Play();
-                    Destroy(enemyHit, 1f);
-
-                    Debug.Log("hit");
-                }
-
-
-            }
             //}
 
             //Debug.Log("Shoot");
