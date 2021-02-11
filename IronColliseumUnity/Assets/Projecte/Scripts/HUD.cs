@@ -30,7 +30,12 @@ public class HUD : MonoBehaviour
 
     public Image misilUI;
 
+    public Lanzallamas lanza;
+    public Arma plasma;
+    public Metralleta metralleta;
 
+    public AudioSource pauseSound;
+    public bool sound;
     public void Awake()
     {
         FPScontroller = FindObjectOfType<FPSController>();
@@ -41,12 +46,12 @@ public class HUD : MonoBehaviour
 
     public void Update()
     {
-        if (change.ReturnCurrent() == 0)
+        if (change.ReturnCurrent() == 0 && plasma.hudAppear == true)
         {
             hudArma.SetActive(true);
         }
 
-        else if (change.ReturnCurrent() != 0)
+        else if (change.ReturnCurrent() != 0 || plasma.hudAppear == false)
         {
             hudArma.SetActive(false);
         }
@@ -61,12 +66,12 @@ public class HUD : MonoBehaviour
             hudMetralleta.SetActive(false);
         }
 
-        if (change.ReturnCurrent() == 2)
+        if (change.ReturnCurrent() == 2 && lanza.hudAppear == true)
         {
             hudLanza.SetActive(true);
         }
 
-        else if (change.ReturnCurrent() != 2)
+        else if (change.ReturnCurrent() != 2 || lanza.hudAppear == false)
         {
             hudLanza.SetActive(false);
         }
@@ -102,6 +107,14 @@ public class HUD : MonoBehaviour
 
     public void OpenPausePanel(bool pause)
     {
+
+        sound = false;
+
+        if (sound == false)
+        {
+            pauseSound.Play();
+            sound = true;
+        }
         pausePanel.SetActive(pause);
     }
 

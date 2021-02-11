@@ -27,6 +27,7 @@ public class ArenaIA : MonoBehaviour
 
     //public Transform enemy;
 
+    //public Animator melee;
     public EnemyMele mele;
 
     public Transform spawnSightRange;
@@ -49,14 +50,19 @@ public class ArenaIA : MonoBehaviour
 
     public float waitAtack;
 
+    private EnemyBehaviour enemy;
+
+    private LevelManager levelManager;
 
     // Start is called before the first frame update
     void Start()
     {
         gameManager = GameObject.FindGameObjectWithTag("Manager").GetComponent<GameManager>();
         player = GameObject.Find("Player").transform;
-
+        levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
         agent = GetComponent<NavMeshAgent>();
+
+        enemy = GetComponent<EnemyBehaviour>();
         canAttack = true;
 
         alreadyAttacked = true;
@@ -71,114 +77,140 @@ public class ArenaIA : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        playerInSightRange = Physics.CheckSphere(spawnSightRange.position, sightRange, whatIsPlayer);
-        enemyShootRange = Physics.CheckSphere(transform.position, shootRange, whatIsPlayer);
-
-
-        if (meleCadency <= 0 && playerInMeleRange == false)
+        if (levelManager.startArena == true)
         {
-            playerInAttackRange = Physics.CheckSphere(transform.position, attackRange, whatIsPlayer);
+            playerInSightRange = Physics.CheckSphere(transform.position, sightRange, whatIsPlayer);
+            enemyShootRange = Physics.CheckSphere(transform.position, shootRange, whatIsPlayer);
+            transform.LookAt(player);
 
         }
 
-        else
+        if (levelManager.startArena == false)
         {
-            playerInAttackRange = false;
-        }
-
-        if (meleCadency <= 0)
-        {
-            playerInMeleRange = Physics.CheckSphere(transform.position, meleRange, whatIsPlayer);
-
-        }
-        else
-        {
-            playerInMeleRange = false;
+            Idle();
         }
 
 
-
-        if (playerInSightRange && playerInAttackRange == false && playerInMeleRange == false)
+        if (levelManager.startArena == true)
         {
+            if (meleCadency <= 0 && playerInMeleRange == false)
+            {
+                playerInAttackRange = Physics.CheckSphere(transform.position, attackRange, whatIsPlayer);
 
-            AttackPlayer();
-            MoveR();
-            meleCadency -= Time.deltaTime;
-            meleTime = 0;
-            agent.speed = 8;
+            }
+
+            else
+            {
+                playerInAttackRange = false;
+            }
+
+            if (meleCadency <= 0)
+            {
+                playerInMeleRange = Physics.CheckSphere(transform.position, meleRange, whatIsPlayer);
+
+            }
+            else
+            {
+                playerInMeleRange = false;
+            }
 
 
-            waitAtack += Time.deltaTime;
 
-            if (waitAtack >= 1f)
+            if (playerInSightRange == true && playerInAttackRange == false && playerInMeleRange == false)
+            {
+
+                AttackPlayer();
+                MoveR();
+                meleCadency -= Time.deltaTime;
+                meleTime = 0;
+                agent.speed = 8;
+
+
+                waitAtack += Time.deltaTime;
+
+                if (waitAtack >= 1f)
+                {
+                    canAttack = true;
+                }
+
+            }
+
+            if (playerInAttackRange && playerInMeleRange == false)
+            {
+                playerInSightRange = false;
+                moveRand = false;
+                Chase();
+
+            }
+
+            if (playerInMeleRange && meleCadency <= 0)
+            {
+                playerInAttackRange = false;
+                hit = true;
+                meleAttack();
+            }
+
+            else
+            {
+                MoveR();
+            }
+
+            if (enemyShootRange)
+            {
+                canAttack = false;
+            }
+            else
             {
                 canAttack = true;
             }
-            
         }
 
-        if (playerInAttackRange && playerInMeleRange == false)
-        {
-            playerInSightRange = false;
-            moveRand = false;
-            Chase();
 
-        }
-
-        if (playerInMeleRange)
-        {
-            playerInAttackRange = false;
-            hit = true;
-            meleAttack();
-        }
-
-        if (enemyShootRange)
-        {
-            canAttack = false;
-        }
-        else
-        {
-            canAttack = true;
-        }
-
-        transform.LookAt(player);
 
 
     }
 
     private void MoveR()
     {
-        agent.isStopped = false;
-        agent.speed = 8;
-        Debug.Log("Home");
-        newPos = transform.position + new Vector3(Random.onUnitSphere.x * 500, 1f, Random.onUnitSphere.z * 500);
-        agent.SetDestination(newPos);
-        StartCoroutine(Wait());
+
+        if (enemy.dead == false)
+        {
+            agent.isStopped = false;
+            agent.speed = 8;
+            Debug.Log("Home");
+            newPos = transform.position + new Vector3(Random.onUnitSphere.x * 100, 1f, Random.onUnitSphere.z * 100);
+            agent.SetDestination(newPos);
+            //StartCoroutine(Wait());
+        }
+        
 
     }
 
     private void AttackPlayer()
     {
-
-        if (canAttack == false)
+        if (enemy.dead == false)
         {
-            return;
+            if (canAttack == false)
+            {
+                return;
+            }
+
+            if (!alreadyAttacked && canAttack == true)
+            {
+                //Codi del attack
+                //Instantiate(projectile, transform.position, Quaternion.identity);
+
+                //rb.AddForce(transform.forward * 32f, ForceMode.Impulse);
+
+                //
+                weapon.Shoot();
+                timeBetweenAttacks = Random.Range(1, 5);
+
+                alreadyAttacked = true;
+                Invoke(nameof(ResetAttack), timeBetweenAttacks);
+            }
         }
 
-        if (!alreadyAttacked && canAttack == true)
-        {
-            //Codi del attack
-            //Instantiate(projectile, transform.position, Quaternion.identity);
-
-            //rb.AddForce(transform.forward * 32f, ForceMode.Impulse);
-
-            //
-            weapon.Shoot();
-            timeBetweenAttacks = Random.Range(1, 5);
-
-            alreadyAttacked = true;
-            Invoke(nameof(ResetAttack), timeBetweenAttacks);
-        }
 
   
 
@@ -192,47 +224,64 @@ public class ArenaIA : MonoBehaviour
     private void Idle()
     {
         agent.speed = 0;
+        Debug.Log("IsIdle");
     }
 
     private void Chase()
     {
-        agent.speed = 15;
-        agent.SetDestination(player.position);
-        canAttack = false;
 
-        if (agent.remainingDistance <= meleRange)
+        if (enemy.dead == false)
         {
-            agent.speed = 0;
+            agent.speed = 15;
+            agent.SetDestination(player.position);
+            canAttack = false;
+
+            if (agent.remainingDistance <= meleRange)
+            {
+                agent.speed = 0;
+            }
         }
+
     }
 
     private void meleAttack()
     {
-        mele.Attack();
-        canAttack = false;
 
-        meleTime += Time.deltaTime;
-
-        if (meleTime >= 0.3f)
+        if (enemy.dead == false)
         {
-            meleCadency = 3f;
-            
-            waitAtack = 0;
-            mele.ReturnIdle();
+            mele.Attack();
+            //melee.SetBool("Melee", true);
+            canAttack = false;
 
-            agent.SetDestination(afterMele.position);
+            meleTime += Time.deltaTime;
 
-            if (agent.remainingDistance <= 0.1f)
+            if (meleTime >= 0.3f)
             {
-                playerInSightRange = true;
-                playerInMeleRange = false;
+                meleCadency = 3f;
+
+                waitAtack = 0;
+                mele.ReturnIdle();
+                //melee.SetBool("Melee", false);
+
+
+                agent.SetDestination(afterMele.position);
+
+                if (agent.remainingDistance <= 0.1f)
+                {
+                    playerInSightRange = true;
+                    playerInMeleRange = false;
+
+                }
+
+
             }
         }
+
     }
 
     IEnumerator Wait()
     {
-        stopped = Random.Range(5f, 10f);
+        stopped = Random.Range(0.5f, 1f);
         yield return new WaitForSeconds(stopped);
         agent.speed = 0;
         stopped = Random.Range(0.5f, 1f);

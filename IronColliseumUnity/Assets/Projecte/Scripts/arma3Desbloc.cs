@@ -9,6 +9,7 @@ public class arma3Desbloc : MonoBehaviour
 
     private GameManager manager;
     private ChangeWeapon change;
+    private FPSController player;
 
     // Start is called before the first frame update
     void Start()
@@ -32,6 +33,8 @@ public class arma3Desbloc : MonoBehaviour
     {
         if (other.tag == "Player")
         {
+            player = GameObject.FindGameObjectWithTag("Player").GetComponent<FPSController>();
+            player.PlayPower();
             change.hasArma3 = true;
             Destroy(gameObject);
         }

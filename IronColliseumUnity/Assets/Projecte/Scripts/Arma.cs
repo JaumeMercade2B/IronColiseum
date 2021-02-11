@@ -49,6 +49,15 @@ public class Arma : MonoBehaviour
 
     private FPSController player;
 
+    public Material dissolveMat;
+    public float disolve;
+
+    public bool appear;
+
+    public bool hudAppear;
+    public bool disappear;
+
+    public bool hasWeapon;
     void Awake()
     {
         /*
@@ -66,6 +75,8 @@ public class Arma : MonoBehaviour
         ammo = maxAmmo;
         reloading = false;
 
+        hasWeapon = false;
+
         hud = GameObject.FindGameObjectWithTag("HUD").GetComponent<HUD>();
         change = GameObject.FindGameObjectWithTag("Holder").GetComponent<ChangeWeapon>();
         player = GameObject.FindGameObjectWithTag("Player").GetComponent<FPSController>();
@@ -73,6 +84,10 @@ public class Arma : MonoBehaviour
 
         SetActive();
         hud.SetAmmoText(ammo);
+
+        disolve = 1;
+        dissolveMat.SetFloat("Vector1_283E90B", disolve);
+
     }
 
     private void Start()
@@ -123,6 +138,12 @@ public class Arma : MonoBehaviour
         transform.localRotation = Quaternion.Lerp(transform.localRotation, Final, (Time.deltaTime * amount) * smooth);
         */
 
+        if (hasWeapon == false)
+        {
+            muzzleFlash.Stop();
+            shoot = false;
+        }
+
         if (!shoot)
         {
             timeCounter += Time.deltaTime;
@@ -143,12 +164,40 @@ public class Arma : MonoBehaviour
             }
         }
 
+        if (appear == true && hasWeapon == true)
+        {
+            shoot = false;
+            disolve -= 0.8f * Time.deltaTime;
+            dissolveMat.SetFloat("Vector1_283E90B", disolve);
+            if (disolve <= 0)
+            {
+                disolve = 0;
+                dissolveMat.SetFloat("Vector1_283E90B", disolve);
+                hudAppear = true;
+                shoot = true;
+                appear = false;
+            }
+        }
+
+        if (disappear == true)
+        {
+            shoot = false;
+            disolve += 0.8f * Time.deltaTime;
+            dissolveMat.SetFloat("Vector1_283E90B", disolve);
+
+            if (disolve >= 1)
+            {
+                spawn.SetActive(false);
+            }
+            
+        }
+
         //PointingEnemy();
     }
 
     public void Shoot()
     {
-        if (!shoot || player.isDead == true)
+        if (!shoot || player.isDead == true || hasWeapon == false)
         {
             return;
         }
@@ -176,7 +225,7 @@ public class Arma : MonoBehaviour
 
     public void Reload()
     {
-        if (reloading || ammo == maxAmmo)
+        if (reloading || ammo == maxAmmo || change.currentWeapon != 0)
         {
             return;
         }
@@ -188,12 +237,18 @@ public class Arma : MonoBehaviour
     {
         if (change.ReturnCurrent() == 0)
         {
+            disappear = false;
             spawn.SetActive(true);
+            appear = true;
+
+            
         }
 
         else if (change.ReturnCurrent() != 0)
         {
-            spawn.SetActive(false);
+            hudAppear = false;
+            disappear = true;
+            
         }
     }
 

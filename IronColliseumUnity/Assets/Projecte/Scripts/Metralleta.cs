@@ -35,10 +35,35 @@ public class Metralleta : MonoBehaviour
 
     private EnemyBehaviour enemy;
 
+    private FuckThePoliceBehaviour fuckPolice;
+
+    private DronBehaviour dron;
+
+    private DestroyTorreta destroyTorreta;
+
+    private SegurataBehaviour segurata;
+
+    private BossBehaviour boss;
+
     private HUD hud;
 
     private FPSController player;
 
+    public DetectInput input;
+
+
+    public Material dissolveMat;
+    public Material dissolveMat2;
+
+    public float disolve;
+
+    public bool hudAppear;
+    public bool disappear;
+    public bool appear;
+
+    public Animator canoAnim;
+
+    public PlaySoundMetralleta sound;
 
     // Start is called before the first frame update
     void Start()
@@ -58,77 +83,109 @@ public class Metralleta : MonoBehaviour
         //automatic = GameObject.FindGameObjectWithTag("Automatic").GetComponent<Automatic>();
 
         hud.SetMetralletaText(ammo, maxAmmo);
+
+        disolve = 1;
+        dissolveMat.SetFloat("Vector1_283E90B", disolve);
+        dissolveMat2.SetFloat("Vector1_283E90B", disolve);
+
+
     }
 
-    public void Update()
+    public void FixedUpdate()
     {
         SetActive();
+        cadency += Time.deltaTime;
         Debug.DrawRay(spawn.transform.position, spawn.transform.forward * distance, Color.green);
 
-        if (canShoot && cadency >= waitCadency)
+        Shoot();
+
+        
+        if (input.gamepadActive == false)
         {
+            Mouse kb = InputSystem.GetDevice<Mouse>();
 
-
-            muzzleFlash.Play();
-            //Ray ray = mainCamera.ScreenPointToRay(screenPos);
-
-
-            //cadency = 0;
-
-
-            //automatic.SetActive();
-
-            //Ray ray = mainCamera.ScreenPointToRay(mainCamera.transform.forward);
-            RaycastHit hit;
-
-            //for (int i = 0; i <= ammo; i++)
-            //{
-
-                if (Physics.Raycast(spawn.transform.position, spawn.transform.forward, out hit, distance)) //Aquí diem si el raig ha xocat amb quelcom
-                {
-
-                    Debug.Log(hit.transform.name);
-                    if (hit.transform.CompareTag("Enemy"))
-                    {
-                        enemy =  hit.transform.GetComponent<EnemyBehaviour>();
-                        enemy.GetDamage(damage);
-                    //enemyHit.Play(hit.transform)
-                    //enemyHit.transform.position = 
-                    //enemyHit.Play();
-                    Destroy(enemyHit, 1f);
-                        
-                        Debug.Log("hit");
-                    }
-
-
-                }
-            //}
-
-            //Debug.Log("Shoot");
-            if (player.godMode == false)
+            if (kb.leftButton.isPressed &&  disolve <= 0 && reloading == false)
             {
-                ammo--;
+                canShoot = true;
+                canoAnim.SetBool("Disparar", true);
             }
-            
-            hud.SetMetralletaText(ammo, maxAmmo);
-            cadency = 0;
+
+            else
+            {
+                canoAnim.SetBool("Disparar", false);
+
+                canShoot = false;
+                sound.Stop();
+            }
         }
 
-        if (ammo <= 0)
+        else if (input.gamepadActive == true )
         {
-            ammo = 0;
-            Reload();
+            Gamepad Gp = InputSystem.GetDevice<Gamepad>();
+
+            if (Gp.rightTrigger.isPressed && disolve <= 0 && reloading == false)
+            {
+                canShoot = true;
+                canoAnim.SetBool("Disparar", true);
+
+            }
+
+            else
+            {
+                canoAnim.SetBool("Disparar", false);
+
+                canShoot = false;
+                sound.Stop();
+            }
         }
+
+        if (appear == true)
+        {
+            //canShoot = false;
+            disolve -= 0.8f * Time.deltaTime;
+            dissolveMat.SetFloat("Vector1_283E90B", disolve);
+            dissolveMat2.SetFloat("Vector1_283E90B", disolve);
+
+            if (disolve <= 0)
+            {
+                disolve = 0;
+                dissolveMat.SetFloat("Vector1_283E90B", disolve);
+                dissolveMat2.SetFloat("Vector1_283E90B", disolve);
+
+                hudAppear = true;
+                //canShoot = true;
+                appear = false;
+            }
+        }
+
+        if (disappear == true)
+        {
+            canShoot = false;
+            disolve += 0.8f * Time.deltaTime;
+            dissolveMat.SetFloat("Vector1_283E90B", disolve);
+
+            if (disolve >= 1)
+            {
+                gameObject.SetActive(false);
+            }
+
+        }
+
+
+
+
+
+        var allGamepads = Gamepad.all;
+
+
+        
+
 
         //if (!canShoot)
         //{
         //    automatic.SetInactive();
 
         //}
-    }
-    public void FixedUpdate()
-    {
-        cadency += Time.deltaTime;
     }
 
     // Update is called once per frame
@@ -155,9 +212,104 @@ public class Metralleta : MonoBehaviour
             return;
         }
 
-        if (player.isDead == false)
+        if (player.isDead == false && canShoot == true)
         {
-            canShoot = true;
+            if (canShoot && cadency >= waitCadency)
+            {
+
+
+                muzzleFlash.Play();
+                //Ray ray = mainCamera.ScreenPointToRay(screenPos);
+
+
+                //cadency = 0;
+
+
+                //automatic.SetActive();
+
+                //Ray ray = mainCamera.ScreenPointToRay(mainCamera.transform.forward);
+                RaycastHit hit;
+
+                //for (int i = 0; i <= ammo; i++)
+                //{
+
+                if (Physics.Raycast(spawn.transform.position, spawn.transform.forward, out hit, distance)) //Aquí diem si el raig ha xocat amb quelcom
+                {
+
+                    Debug.Log(hit.transform.name);
+                    if (hit.transform.CompareTag("Enemy"))
+                    {
+                        enemy = hit.transform.GetComponent<EnemyBehaviour>();
+                        enemy.GetDamage(damage);
+                        //enemyHit.Play(hit.transform)
+                        //enemyHit.transform.position = 
+                        //enemyHit.Play();
+                        Destroy(enemyHit, 1f);
+
+                        Debug.Log("hit");
+                    }
+
+                    if (hit.transform.CompareTag("Police"))
+                    {
+                        fuckPolice = hit.transform.GetComponent<FuckThePoliceBehaviour>();
+                        fuckPolice.GetDamage(damage);
+                        //enemyHit.Play(hit.transform)
+                        //enemyHit.transform.position = 
+                        //enemyHit.Play();
+                        Destroy(enemyHit, 1f);
+
+                        Debug.Log("hit");
+                    }
+
+                    if (hit.transform.CompareTag("Dron"))
+                    {
+                        dron = hit.transform.GetComponent<DronBehaviour>();
+                        dron.GetDamage(damage);
+                        //enemyHit.Play(hit.transform)
+                        //enemyHit.transform.position = 
+                        //enemyHit.Play();
+                        Destroy(enemyHit, 1f);
+
+                        Debug.Log("hit");
+                    }
+
+                    if (hit.transform.CompareTag("DestroyTorreta"))
+                    {
+                        destroyTorreta = hit.transform.GetComponent<DestroyTorreta>();
+                        destroyTorreta.GetDamage(damage);
+                    }
+
+                    if (hit.transform.CompareTag("Segurata"))
+                    {
+                        segurata = hit.transform.GetComponent<SegurataBehaviour>();
+                        segurata.Dead();
+                        //Destroy(gameObject);
+                    }
+
+                    if (hit.transform.CompareTag("Boss"))
+                    {
+                        boss = hit.transform.GetComponent<BossBehaviour>();
+                        boss.GetDamage(damage);
+                    }
+
+                }
+                //}
+
+                //Debug.Log("Shoot");
+                if (player.godMode == false)
+                {
+                    ammo--;
+                }
+
+                hud.SetMetralletaText(ammo, maxAmmo);
+                cadency = 0;
+            }
+
+            if (ammo <= 0)
+            {
+                ammo = 0;
+                Reload();
+            }
 
         }
 
@@ -171,7 +323,7 @@ public class Metralleta : MonoBehaviour
 
     public void Reload()
     {
-        if (reloading || ammo == maxAmmo || manager.pause == true)
+        if (reloading || ammo == maxAmmo || manager.pause == true || change.currentWeapon != 1)
         {
             return;
         }
@@ -184,12 +336,18 @@ public class Metralleta : MonoBehaviour
     {
         if (change.ReturnCurrent() == 1)
         {
+            disappear = false;
+
             gameObject.SetActive(true);
+            appear = true;
+
         }
 
         else if (change.ReturnCurrent() != 1)
         {
-            gameObject.SetActive(false);
+            //gameObject.SetActive(false);
+            hudAppear = false;
+            disappear = true;
         }
     }
 
@@ -201,6 +359,8 @@ public class Metralleta : MonoBehaviour
 
     IEnumerator WaitForReload()
     {
+        canoAnim.SetBool("Disparar", false);
+
         canShoot = false;
         yield return new WaitForSeconds(reloadTime);
         ammo = maxAmmo;

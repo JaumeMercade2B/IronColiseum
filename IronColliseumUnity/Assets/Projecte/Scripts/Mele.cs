@@ -8,24 +8,51 @@ public class Mele : MonoBehaviour
     private Animator animator;
     public bool isAttacking;
     public float cadency = 0f;
-    private Collider col;
+    public Collider col;
     public float damage = 3;
 
     public AudioSource hit;
 
-    public EnemyBehaviour enemy;
+    private EnemyBehaviour enemy;
+    private FuckThePoliceBehaviour fuckPolice;
+    private DronBehaviour dron;
+    private SegurataBehaviour segurata;
+
+    public bool disappear;
+    public bool appear;
+    public bool hasWeapon;
+
+    public Material dissolveMat;
+    public float disolve;
 
     // Start is called before the first frame update
     void Start()
     {
         animator = GetComponent<Animator>();
-        col = GetComponent<Collider>();
-        
+        //col = GetComponent<Collider>();
+
+        disolve = 1;
+        dissolveMat.SetFloat("Vector1_283E90B", disolve);
+
     }
 
     // Update is called once per frame
     void Update()
     {
+
+        if (hasWeapon == true)
+        {
+            disolve -= 0.8f * Time.deltaTime;
+            dissolveMat.SetFloat("Vector1_283E90B", disolve);
+
+            if (disolve <= 0)
+            {
+                disolve = 0;
+                dissolveMat.SetFloat("Vector1_283E90B", disolve);
+                appear = false;
+                cadency += Time.deltaTime;
+            }
+        }
 
         cadency += Time.deltaTime;
 
@@ -40,13 +67,15 @@ public class Mele : MonoBehaviour
         else
         {
             animator.SetTrigger("Idle");
+            col.enabled = false;
         }
     }
 
     public void Attack()
     {
-        if (cadency >= 2f)
+        if (cadency >= 2f && hasWeapon == true)
         {
+            col.enabled = true;
             isAttacking = true;
             hit.Play();
             StartCoroutine(WaitForAttack());
@@ -71,6 +100,35 @@ public class Mele : MonoBehaviour
             
             //}
   
+        }
+
+        if (other.tag == "Police")
+        {
+            //if (isAttacking)
+            //{
+            fuckPolice = other.gameObject.GetComponent<FuckThePoliceBehaviour>();
+            fuckPolice.GetDamage(damage);
+
+            //}
+
+        }
+
+        if (other.tag == "Dron")
+        {
+            //if (isAttacking)
+            //{
+            dron = GameObject.FindGameObjectWithTag("Dron").GetComponent<DronBehaviour>();
+            dron.GetDamage(damage);
+
+            //}
+
+        }
+
+        if (other.tag == "Segurata")
+        {
+            segurata = other.gameObject.GetComponent<SegurataBehaviour>();
+            segurata.Dead();
+            //Destroy(gameObject);
         }
     }
 

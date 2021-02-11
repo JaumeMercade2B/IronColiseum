@@ -98,7 +98,7 @@ public class ArenaBullet : MonoBehaviour
             Destroy(gameObject);
 
         }
-
+        //Destroy(gameObject);
     }
 
 

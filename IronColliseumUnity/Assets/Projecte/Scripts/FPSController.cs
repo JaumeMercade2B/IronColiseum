@@ -4,6 +4,8 @@ using System.Configuration;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using DG.Tweening;
+
 
 public class FPSController : MonoBehaviour
 {
@@ -20,7 +22,7 @@ public class FPSController : MonoBehaviour
     [SerializeField] float waitShield = 5;
     [SerializeField] float cooldownShield = 0;
     [SerializeField] float speedCharge = 0.1f;
-
+    [SerializeField] bool shader;
 
 
 
@@ -42,10 +44,11 @@ public class FPSController : MonoBehaviour
     [SerializeField] private float jumpCoolDown;
     [SerializeField] private float jumpForce;
     [SerializeField] private bool holdingSpace;
-    [SerializeField] private bool isGrounded;
+    [SerializeField] public bool isGrounded;
     public LayerMask groundMask;
     Ray ray;
     RaycastHit hit;
+    public JumpStairs jumpStairs;
 
 
     private bool dash;
@@ -107,6 +110,18 @@ public class FPSController : MonoBehaviour
     public AudioSource tuercasSound;
 
 
+    private bool changeDirection;
+    private Vector3 currentDirection;
+    private Vector3 newDirection;
+
+    public bool killedArena;
+
+    public AudioSource power1;
+    public AudioSource power2;
+
+    public GameObject tuercasUI;
+
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -114,7 +129,7 @@ public class FPSController : MonoBehaviour
         hasJumped = false;
         isDead = false;
         numTuto = 0;
-
+        shader = false;
         life = maxLife;
         shield = maxShield;
         totalLife = life + shield;
@@ -141,7 +156,7 @@ public class FPSController : MonoBehaviour
         misilCounter = 2;
         misilShot = true;
 
-
+        killedArena = false;
 
 
         //arma =GameObject.FindGameObjectWithTag("Arma").GetComponent<Arma>();
@@ -189,20 +204,46 @@ public class FPSController : MonoBehaviour
 
         if (direction.x == 0 && direction.z == 0)
         {
-            movementSpeed = 1;
+            movementSpeed = 0;
+
         }
 
         else if (direction.x != 0 || direction.z != 0)
         {
-            movementSpeed += 1;
+            currentDirection = direction;
 
-            if (movementSpeed >= normalSpeed)
+            if (currentDirection != direction)
             {
-                movementSpeed = normalSpeed;
+                movementSpeed = 0;
+                currentDirection = direction;
             }
+
+            if (isGrounded == true)
+            {
+                normalSpeed = 10;
+                movementSpeed += 0.5f;
+
+                if (movementSpeed >= normalSpeed)
+                {
+                    movementSpeed = normalSpeed;
+
+                }
+            }
+
+            else if (isGrounded == false)
+            {
+                normalSpeed = 7;
+                movementSpeed += 0.5f;
+
+                if (movementSpeed >= normalSpeed)
+                {
+                    movementSpeed = normalSpeed;
+                }
+            }
+
         }
 
-        
+
 
         FixedUpdateJump();
         //FixedUpdateDash();
@@ -215,6 +256,7 @@ public class FPSController : MonoBehaviour
         if (shield <= 0)
         {
             shield = 0;
+            shader = true;
         }
 
         if (shield < maxShield)
@@ -264,31 +306,6 @@ public class FPSController : MonoBehaviour
         if (canDash)
         {
 
-            //movementSpeed = dashSpeed;
-
-            //if (direction.z == 1)
-            //    rb.AddForce(transform.forward * dashSpeed, ForceMode.Impulse);
-
-            //else if (direction.z == -1)
-            //    rb.AddForce(-transform.forward * dashSpeed, ForceMode.Impulse);
-
-            //if (direction.x == 1)
-            //    rb.AddForce(transform.right * dashSpeed, ForceMode.Impulse);
-
-            //else if (direction.x == -1)
-            //    rb.AddForce(-transform.right * dashSpeed, ForceMode.Impulse);
-
-            //if (direction.x > 0 && direction.x < 1)
-            //    rb.AddForce(transform.right * dashSpeed/2, ForceMode.Impulse);
-
-            //else if (direction.x < 0 && direction.x > -1)
-            //    rb.AddForce(-transform.right * dashSpeed/2, ForceMode.Impulse);
-
-            //if (direction.z > 0 && direction.z < 1)
-            //    rb.AddForce(transform.forward * dashSpeed / 2, ForceMode.Impulse);
-
-            //else if (direction.z > 0 && direction.z < 1)
-            //    rb.AddForce(-transform.forward * dashSpeed / 2, ForceMode.Impulse);
 
             rb.AddForce(transform.TransformDirection(movement.normalized) * dashSpeed, ForceMode.VelocityChange);
             
@@ -351,6 +368,7 @@ public class FPSController : MonoBehaviour
             Death();
         }
 
+    
 
     }
 
@@ -386,13 +404,6 @@ public class FPSController : MonoBehaviour
 
     public void Move()
     {
-        FixedUpdateMove();
-    }
-
-    Vector3 movement = Vector3.zero;
-    public void FixedUpdateMove()
-    {
-
         var movementInput = controls.Gameplay.Move.ReadValue<Vector2>();
 
         movement.x = movementInput.x;
@@ -422,7 +433,7 @@ public class FPSController : MonoBehaviour
             //{
             //    pasos.Stop();
             //}
-            
+
         }
 
         Debug.Log(movement.x);
@@ -430,6 +441,13 @@ public class FPSController : MonoBehaviour
         //Debug.Log("IsWalking");
 
         direction = movement;
+    }
+
+    Vector3 movement = Vector3.zero;
+    public void FixedUpdateMove()
+    {
+
+
         
         
 
@@ -444,7 +462,7 @@ public class FPSController : MonoBehaviour
 
 
 
-            if (isGrounded)
+            if (isGrounded || jumpStairs.canJump == true)
             {
                 jumpCoolDown = 0.2f;
                 rb.AddForce(Vector3.up * jumpForce, ForceMode.Force);
@@ -532,6 +550,12 @@ public class FPSController : MonoBehaviour
         tuercasSound.Play();
     }
 
+    public void ApparitionTuercas()
+    {
+        tuercasUI.SetActive(true);
+        StartCoroutine(DisappearTuercas());
+    }
+
     public void Death()
     {
         isDead = true;
@@ -544,7 +568,7 @@ public class FPSController : MonoBehaviour
         {
             change = GameObject.FindGameObjectWithTag("Holder").GetComponent<ChangeWeapon>();
             change.hasMetralleta = true;
-            
+            power1.Play();
         }
 
         if (other.tag == "Bloc")
@@ -632,13 +656,23 @@ public class FPSController : MonoBehaviour
     }
 
  
-
+    public void PlayPower()
+    {
+        power2.Play();
+    }
 
 
     IEnumerator WaitDeath()
     {
         yield return new WaitForSeconds(2);
         manager.LoadDeath();
+    }
+
+    IEnumerator DisappearTuercas()
+    {
+        yield return new WaitForSeconds(2);
+        tuercasUI.SetActive(false);
+        StopCoroutine(DisappearTuercas());
     }
 
     //IEnumerator WaitDamage()

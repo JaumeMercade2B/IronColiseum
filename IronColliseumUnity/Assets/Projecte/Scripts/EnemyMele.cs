@@ -5,16 +5,23 @@ using UnityEngine;
 public class EnemyMele : MonoBehaviour
 {
 
-    public ArenaIA enemy;
-    private Animator animator;
-    public FPSController player;
+    private ArenaIA enemy;
+    public Animator animator;
+    private FPSController player;
     public float damage = 1.5f;
     public float restDamage = 0f;
+    private EnemyBehaviour enemyB;
+
+    public Collider col;
 
     // Start is called before the first frame update
     void Start()
     {
-        animator = GetComponent<Animator>();
+        //animator = GetComponent<Animator>();
+        enemyB = GameObject.FindGameObjectWithTag("Enemy").GetComponent<EnemyBehaviour>();
+        enemy = GameObject.FindGameObjectWithTag("Enemy").GetComponent<ArenaIA>();
+        player = GameObject.FindGameObjectWithTag("Player").GetComponent<FPSController>();
+
     }
 
     // Update is called once per frame
@@ -29,13 +36,17 @@ public class EnemyMele : MonoBehaviour
 
     public void Attack()
     {
-        animator.SetBool ("Attack", true);
+        col.enabled = true;
+
+        animator.SetBool ("Melee", true);
         //StartCoroutine(WaitAttack());
     }
 
     public void ReturnIdle()
     {
-        animator.SetBool("Attack", false);
+        col.enabled = false;
+
+        animator.SetBool("Melee", false);
     }
 
     IEnumerator WaitAttack()
@@ -43,7 +54,9 @@ public class EnemyMele : MonoBehaviour
         //animator.SetBool("Attack", false);
         yield return new WaitForSecondsRealtime(0.3f);
 
-        animator.SetBool("Attack", false);
+        //col.enabled = false;
+
+        animator.SetBool("Melee", false);
 
         yield return new WaitForSecondsRealtime(3f);
 
@@ -52,7 +65,7 @@ public class EnemyMele : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "Player")
+        if (other.tag == "Player" && enemyB.dead == false)
         {
 
             

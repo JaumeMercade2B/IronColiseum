@@ -13,6 +13,8 @@ public class EnemyBehaviour : MonoBehaviour
     public float life;
     public float maxLife;
 
+    public bool dead;
+
     //public Renderer renderer;
     //public Renderer renderer2;
     //private Material mymat;
@@ -28,6 +30,14 @@ public class EnemyBehaviour : MonoBehaviour
 
     private GameManager manager;
 
+    public Transform spawnTuercas;
+
+    private FPSController player;
+
+    public GameObject dropWeapon;
+
+    public Transform weaponSpawn;
+
     //public GameObject malla;
 
     // Start is called before the first frame update
@@ -39,7 +49,7 @@ public class EnemyBehaviour : MonoBehaviour
         //mymat2.EnableKeyword("_EMISSION");
 
         manager = GameObject.FindGameObjectWithTag("Manager").GetComponent<GameManager>();
-
+        player = GameObject.FindGameObjectWithTag("Player").GetComponent<FPSController>();
         life = maxLife;
         //slider.value = CalculateHealth();
         col = GetComponent<Collider>();
@@ -98,6 +108,7 @@ public class EnemyBehaviour : MonoBehaviour
     {
         if (life <= 0)
         {
+            dead = true;
             //col.enabled = false;
 
             //foreach (Transform child in transform)
@@ -106,8 +117,16 @@ public class EnemyBehaviour : MonoBehaviour
 
             //}
             manager.enemyCount += 1;
+
+            if (manager.enemyCount <= 1)
+            {
+                Instantiate(dropWeapon, weaponSpawn.position, Quaternion.identity);
+            }
+
+            player.killedArena = true;
+            Instantiate(dropTuercas, spawnTuercas.transform.position, Quaternion.identity);
+
             Destroy(gameObject);
-            Instantiate(dropTuercas, new Vector3(transform.position.x, 0.5f, transform.position.z), Quaternion.identity);
         }
     }
 

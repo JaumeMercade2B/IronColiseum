@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
 
 
 
@@ -17,11 +18,27 @@ public class MenuManager : MonoBehaviour
     public GameObject options;
     public bool openOptions;
 
+    public DetectInput input;
+
+    public GameObject continui;
+    public GameObject optionsButton;
+
+    public EventSystem sistemMenu;
+
     private void Start()
     {
         Time.timeScale = 1;
+
         manager = GameObject.FindGameObjectWithTag("Manager").GetComponent<GameManager>();
         hud = GameObject.FindGameObjectWithTag("HUD").GetComponent<HUD>();
+
+        if (input.gamepadActive == true)
+        {
+            sistemMenu.SetSelectedGameObject(continui);
+
+        }
+     
+        openOptions = false;
 
     }
 
@@ -30,7 +47,17 @@ public class MenuManager : MonoBehaviour
         if (openOptions)
         {
             manager.pause = true;
-            hud.OpenPausePanel(false);
+        }
+
+        if (input.gamepadActive && openOptions == false)
+            sistemMenu.firstSelectedGameObject = continui;
+
+        else if (input.gamepadActive && openOptions == true)
+        {
+
+            sistemMenu.firstSelectedGameObject = optionsButton;
+
+
         }
     }
     public void LoadGame()
@@ -40,7 +67,16 @@ public class MenuManager : MonoBehaviour
 
     public void Menu()
     {
+        if (input.gamepadActive == true)
+        {
+            sistemMenu.SetSelectedGameObject(continui);
 
+        }
+        Time.timeScale = 0;
+        hud.OpenPausePanel(false);
+        openOptions = false;
+        //sistemMenu.SetSelectedGameObject(null);
+        //sistemMenu.firstSelectedGameObject = null;
         StartCoroutine(WaitLoadMenu());
 
     }
@@ -65,6 +101,16 @@ public class MenuManager : MonoBehaviour
 
     }
 
+    public void Victory()
+    {
+        StartCoroutine(LoadVictory());
+    }
+
+    public void Dead()
+    {
+        StartCoroutine(LoadDead());
+    }
+
     IEnumerator WaitLoadGame()
     {
         animator.SetTrigger("Start");
@@ -84,7 +130,9 @@ public class MenuManager : MonoBehaviour
     {
         animator.SetTrigger("Start");
         yield return new WaitForSecondsRealtime(1);
+        hud.OpenPausePanel(false);
         options.SetActive(true);
+        sistemMenu.SetSelectedGameObject(optionsButton);
         animator.SetTrigger("End");
         openOptions = true;
         manager.pause = true;
@@ -99,6 +147,8 @@ public class MenuManager : MonoBehaviour
         animator.SetTrigger("Start");
         yield return new WaitForSecondsRealtime(1);
         options.SetActive(false);
+        hud.OpenPausePanel(true);
+        sistemMenu.SetSelectedGameObject(continui);
         animator.SetTrigger("End");
         openOptions = false;
         manager.pause = true;
@@ -111,6 +161,20 @@ public class MenuManager : MonoBehaviour
         animator.SetTrigger("Start");
         yield return new WaitForSecondsRealtime(1);
         Application.Quit();
+    }
+
+    IEnumerator LoadVictory()
+    {
+        animator.SetTrigger("Start");
+        yield return new WaitForSecondsRealtime(1);
+        SceneManager.LoadScene("Victory");
+    }
+
+    IEnumerator LoadDead()
+    {
+        animator.SetTrigger("Start");
+        yield return new WaitForSecondsRealtime(1);
+        SceneManager.LoadScene("Death");
     }
 
 }

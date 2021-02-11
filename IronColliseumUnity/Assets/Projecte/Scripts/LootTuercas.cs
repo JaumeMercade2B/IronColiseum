@@ -24,6 +24,8 @@ public class LootTuercas : MonoBehaviour
         if (other.tag == "Player")
         {
             FPScontroller.tuercas += 300;
+            FPScontroller.ApparitionTuercas();
+            
             FPScontroller.SoundTuercas();
             Destroy(gameObject);
 
